@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- Anti-Cache Meta Tags to force instant updates on mobile -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <title>VagusPrime | Biohacking & Longevity Blueprint</title>
   
   <!-- PWA Settings -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json?v=1.2.1">
   <meta name="theme-color" content="#090d16">
-  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg?v=1.2.1">
+  <link rel="apple-touch-icon" href="icons/icon.svg?v=1.2.1">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -39,7 +45,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=1.2.1">
 </head>
 <body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-black">
 
@@ -103,10 +109,15 @@
       </div>
 
       <div class="space-y-4 text-xs text-gray-300">
-        <!-- VERSION BADGE -->
+        <!-- VERSION BADGE & REFRESH CACHE -->
         <div class="p-3 rounded-xl bg-gray-900/80 border border-gray-800 flex items-center justify-between">
-          <span>Versione Applicazione:</span>
-          <span id="optionsVersionBadge" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">v1.2.1</span>
+          <div>
+            <span class="text-gray-400 block text-[11px]">Versione Attiva:</span>
+            <span id="optionsVersionBadge" class="font-mono font-bold text-emerald-400 text-sm">v1.2.1 (Build 30 Agosto 2026)</span>
+          </div>
+          <button onclick="window.location.reload(true)" class="p-2 bg-gray-800 hover:bg-gray-700 text-cyan-400 rounded-lg border border-gray-700 transition flex items-center gap-1 text-[11px]" title="Ricarica senza cache">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Aggiorna
+          </button>
         </div>
 
         <!-- BIOMETRIC FINGERPRINT OPTION -->
@@ -555,7 +566,7 @@
             <div class="p-3 bg-gray-900 rounded-lg"><span class="text-gray-400 block">RHR Medio:</span><span id="rep-rhr" class="text-lg font-bold text-emerald-400">--</span></div>
             <div class="p-3 bg-gray-900 rounded-lg"><span class="text-gray-400 block">Sonno Profondo:</span><span id="rep-deep-sleep" class="text-lg font-bold text-cyan-400">--</span></div>
             <div class="p-3 bg-gray-900 rounded-lg"><span class="text-gray-400 block">Grasso Viscerale:</span><span id="rep-visceral" class="text-lg font-bold text-amber-400">--</span></div>
-            <div class="p-3 bg-gray-900 rounded-lg"><span class="text-gray-400 block">Aderenza:</span><span class="text-lg font-bold text-emerald-400">94%</span></div>
+            <div class="p-3 bg-gray-900 rounded-lg"><span class="text-lg font-bold text-emerald-400">94%</span></div>
           </div>
         </div>
       </div>
@@ -563,10 +574,11 @@
 
   </main>
 
-  <script src="js/charts.js"></script>
-  <script src="js/parsers.js"></script>
-  <script src="js/correlations.js"></script>
-  <script src="js/breathing.js"></script>
-  <script src="js/app.js"></script>
+  <!-- SCRIPTS WITH CACHE BUSTER -->
+  <script src="js/charts.js?v=1.2.1"></script>
+  <script src="js/parsers.js?v=1.2.1"></script>
+  <script src="js/correlations.js?v=1.2.1"></script>
+  <script src="js/breathing.js?v=1.2.1"></script>
+  <script src="js/app.js?v=1.2.1"></script>
 </body>
 </html>
