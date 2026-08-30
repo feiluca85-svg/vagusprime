@@ -1,0 +1,8 @@
+# Privacy: Ignore raw dumps, databases with personal names, and temp files
+app/data/huawei_raw/
+app/data/uploads/
+Renpho/*.xls
+Renpho/*.xlsx
+Renpho/*.csv
+.DS_Store
+tools/platform-tools/

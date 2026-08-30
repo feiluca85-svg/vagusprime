@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luca Health Blueprint | Biohacking & Medicina Integrata</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#090d16',
+              card: '#111827',
+              border: '#1f293d',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              violet: '#8b5cf6',
+              rose: '#f43f5e',
+              amber: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-black">
+
+  <!-- TOP HEADER -->
+  <header class="no-print border-b border-gray-800/80 bg-[#0c121e]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Brand -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="activity" class="w-5 h-5 text-black font-bold"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            Luca Health Blueprint
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">N=1 Live</span>
+          </h1>
+          <p class="text-xs text-gray-400">Medicina Integrata & Biohacking Circadiano</p>
+        </div>
+      </div>
+
+      <!-- Quick Date & Actions -->
+      <div class="flex items-center space-x-4">
+        <div class="hidden md:flex items-center text-xs text-gray-400 bg-gray-900/60 border border-gray-800 px-3 py-1.5 rounded-lg">
+          <i data-lucide="calendar" class="w-4 h-4 mr-2 text-cyan-400"></i>
+          <span id="currentDateDisplay">Caricamento...</span>
+        </div>
+        <button onclick="switchTab('import')" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500 hover:bg-emerald-400 text-gray-950 flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/20">
+          <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+          <span>Importa Dati</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN NAVIGATION TABS -->
+  <nav class="no-print border-b border-gray-800/60 bg-[#090d16]/90 backdrop-blur-sm sticky top-16 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2.5 no-scrollbar">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active-tab px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 whitespace-nowrap">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+        </button>
+        <button onclick="switchTab('renpho')" id="nav-renpho" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="dna" class="w-4 h-4 text-amber-400"></i> Composizione & Metabolismo
+        </button>
+        <button onclick="switchTab('protocol')" id="nav-protocol" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="check-square" class="w-4 h-4"></i> Protocollo & Dieta
+        </button>
+        <button onclick="switchTab('symptoms')" id="nav-symptoms" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="heart-pulse" class="w-4 h-4"></i> Diario Sintomi
+        </button>
+        <button onclick="switchTab('correlations')" id="nav-correlations" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="git-merge" class="w-4 h-4"></i> Laboratorio N=1
+        </button>
+        <button onclick="switchTab('breathing')" id="nav-breathing" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="wind" class="w-4 h-4"></i> Respiro & Vago
+        </button>
+        <button onclick="switchTab('recipes')" id="nav-recipes" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="utensils" class="w-4 h-4"></i> Meal Prep
+        </button>
+        <button onclick="switchTab('import')" id="nav-import" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="folder-sync" class="w-4 h-4"></i> Gestione Dati
+        </button>
+        <button onclick="switchTab('report')" id="nav-report" class="tab-btn px-3.5 py-2 text-xs sm:text-sm font-medium rounded-lg flex items-center gap-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50 whitespace-nowrap">
+          <i data-lucide="file-text" class="w-4 h-4"></i> Report Medico
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: DASHBOARD PANORAMICA                                       -->
+    <!-- ================================================================= -->
+    <div id="tab-dashboard" class="tab-content space-y-6">
+
+      <!-- HABIT ANCHOR CARD (Promemoria Mattutino) -->
+      <div class="glass-card p-4 border-l-4 border-l-emerald-500 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-emerald-950/20 via-gray-900/40 to-transparent">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-white">Ancoraggio Abitudine Mattutina (Habit Stacking):</h3>
+            <p class="text-xs text-gray-300">
+              <span class="text-emerald-400 font-medium">1. Sveglia & Pipì</span> ➔ 
+              <span class="text-amber-400 font-medium">2. Sali su Bilancia Renpho</span> ➔ 
+              <span class="text-cyan-400 font-medium">3. Bevi Gel Semi di Lino</span> ➔ 
+              <span class="text-violet-400 font-medium">4. Colazione (ore 07:15)</span>
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button onclick="switchTab('protocol')" class="text-xs px-3.5 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg border border-gray-700 transition">
+            Checklist Oggi
+          </button>
+        </div>
+      </div>
+
+      <!-- TOP 4 KPI CARDS (GLANCEABLE NUMBERS) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- CARD 1: QUALITÀ DEL SONNO (HUAWEI FIT 3) -->
+        <div class="glass-card p-5 relative overflow-hidden">
+          <div class="flex items-center justify-between text-gray-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Sonno & Glinfatico</span>
+            <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <i data-lucide="moon" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="kpi-sleep-score" class="text-3xl font-extrabold text-white">--</span>
+            <span class="text-xs text-gray-400">/ 100</span>
+          </div>
+          <div class="mt-3 flex items-center justify-between text-xs border-t border-gray-800/80 pt-2 text-gray-400">
+            <span>Sonno Profondo:</span>
+            <span id="kpi-deep-sleep" class="font-semibold text-cyan-400">-- %</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-400 mt-1">
+            <span>Durata Totale:</span>
+            <span id="kpi-sleep-duration" class="font-medium text-gray-200">-- h</span>
+          </div>
+        </div>
+
+        <!-- CARD 2: CUORE & SISTEMA NERVOSO (RHR) -->
+        <div class="glass-card p-5 relative overflow-hidden">
+          <div class="flex items-center justify-between text-gray-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Battito a Riposo (RHR)</span>
+            <div class="p-2 rounded-lg bg-rose-500/10 text-rose-400">
+              <i data-lucide="heart" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="kpi-resting-hr" class="text-3xl font-extrabold text-white">--</span>
+            <span class="text-xs text-gray-400">bpm</span>
+          </div>
+          <div class="mt-3 flex items-center justify-between text-xs border-t border-gray-800/80 pt-2 text-gray-400">
+            <span>Target Longevità:</span>
+            <span class="font-semibold text-emerald-400">&lt; 58 bpm</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-400 mt-1">
+            <span>Livello Stress Medio:</span>
+            <span id="kpi-stress" class="font-medium text-gray-200">-- / 100</span>
+          </div>
+        </div>
+
+        <!-- CARD 3: COMPOSIZIONE CORPOREA (RENPHO) -->
+        <div class="glass-card p-5 relative overflow-hidden cursor-pointer hover:border-amber-500/40" onclick="switchTab('renpho')">
+          <div class="flex items-center justify-between text-gray-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Peso & Grasso Viscerale</span>
+            <div class="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+              <i data-lucide="scale" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="kpi-weight" class="text-3xl font-extrabold text-white">--</span>
+            <span class="text-xs text-gray-400">kg</span>
+          </div>
+          <div class="mt-3 flex items-center justify-between text-xs border-t border-gray-800/80 pt-2 text-gray-400">
+            <span>Grasso Viscerale:</span>
+            <span id="kpi-visceral" class="font-semibold text-amber-400">Liv. --</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-400 mt-1">
+            <span>Massa Muscolare:</span>
+            <span id="kpi-muscle-kg" class="font-medium text-emerald-400">-- kg</span>
+          </div>
+        </div>
+
+        <!-- CARD 4: STATO INTESTINO & EMORROIDI -->
+        <div class="glass-card p-5 relative overflow-hidden">
+          <div class="flex items-center justify-between text-gray-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Intestino & Emorroidi</span>
+            <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="kpi-symptom-score" class="text-3xl font-extrabold text-white">--</span>
+            <span class="text-xs text-gray-400">/ 5</span>
+          </div>
+          <div class="mt-3 flex items-center justify-between text-xs border-t border-gray-800/80 pt-2 text-gray-400">
+            <span>Stato Emorroidario:</span>
+            <span id="kpi-hemorrhoid-status" class="font-semibold text-emerald-400">Ottimo</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-400 mt-1">
+            <span>Energia Mentale:</span>
+            <span id="kpi-mental-energy" class="font-medium text-gray-200">-- / 5</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MAIN CHARTS ROW -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- CHART 1: RITMO CIRCADIANO & RECUPERO NOTTURNO (Sonno vs RHR) -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="moon" class="w-4 h-4 text-cyan-400"></i>
+                Sonno Profondo & Frequenza a Riposo
+              </h3>
+              <p class="text-xs text-gray-400">Trend storico tra recupero glinfatico (%) e tono vagale notturno (bpm)</p>
+            </div>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="sleepChart"></canvas>
+          </div>
+        </div>
+
+        <!-- CHART 2: COMPOSIZIONE CORPOREA & GRASSO VISCERALE -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="trending-down" class="w-4 h-4 text-amber-400"></i>
+                Evoluzione Peso & Grasso Viscerale
+              </h3>
+              <p class="text-xs text-gray-400">Monitoraggio progressivo bilancia Renpho</p>
+            </div>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CHART 3: SINTOMI & ASSE INTESTINO-CERVELLO -->
+      <div class="glass-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+              Diario Sintomi & Benessere Viscerale (1-5)
+            </h3>
+            <p class="text-xs text-gray-400">Andamento di digestione, emorroidi ed energia mentale nel tempo</p>
+          </div>
+        </div>
+        <div class="h-60 relative">
+          <canvas id="symptomsChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: COMPOSIZIONE CORPOREA & METABOLISMO (RENPHO DEEP-DIVE)     -->
+    <!-- ================================================================= -->
+    <div id="tab-renpho" class="tab-content hidden space-y-6">
+      
+      <!-- TOP HEADER RENPHO -->
+      <div class="glass-card p-6 border-l-4 border-l-amber-500 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="dna" class="w-5 h-5 text-amber-400"></i>
+            Bioimpedenziometria Completa & Bioenergetica Renpho
+          </h2>
+          <p class="text-xs text-gray-400 mt-1">
+            Analisi approfondita di tutti i 14 compartimenti corporei (grasso viscerale, muscolo scheletrico, idratazione cellulare, BMR ed età metabolica).
+          </p>
+        </div>
+        <div class="text-xs bg-gray-900/80 px-3.5 py-2 rounded-xl border border-gray-800 text-gray-300">
+          Ultima Pesata: <strong id="rf-date-time" class="text-amber-400">--</strong>
+        </div>
+      </div>
+
+      <!-- 12-CARD RENPHO METRIC MATRIX -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        
+        <!-- 1. PESO TOTALE -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Peso Corporeo</span>
+            <i data-lucide="scale" class="w-3.5 h-3.5 text-amber-400"></i>
+          </div>
+          <div class="text-2xl font-black text-white"><span id="rf-weight">--</span> <span class="text-xs text-gray-400 font-normal">kg</span></div>
+          <div class="text-[11px] text-gray-400 mt-1">BMI: <strong id="rf-bmi" class="text-gray-200">--</strong></div>
+        </div>
+
+        <!-- 2. GRASSO CORPOREO TOTALE -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Grasso Corporeo</span>
+            <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-amber-400"></i>
+          </div>
+          <div class="text-2xl font-black text-amber-400"><span id="rf-fat-percent">--</span> <span class="text-xs text-gray-400 font-normal">%</span></div>
+          <div class="text-[11px] text-gray-400 mt-1">Range ideale: 13-18%</div>
+        </div>
+
+        <!-- 3. GRASSO VISCERALE (CARDIOVASCULAR FOCUS) -->
+        <div class="glass-card p-4 border-l-2 border-l-rose-500 bg-rose-950/10">
+          <div class="text-[11px] font-semibold text-rose-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Grasso Viscerale</span>
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-rose-400"></i>
+          </div>
+          <div class="text-2xl font-black text-white">Liv. <span id="rf-visceral">--</span></div>
+          <div class="text-[11px] text-emerald-400 mt-1">Target protettivo: &le; 6</div>
+        </div>
+
+        <!-- 4. GRASSO SOTTOCUTANEO -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Grasso Sottocutaneo</span>
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-300"></i>
+          </div>
+          <div class="text-2xl font-black text-white"><span id="rf-sub-fat">--</span> <span class="text-xs text-gray-400 font-normal">%</span></div>
+          <div class="text-[11px] text-gray-400 mt-1">Tessuto adiposo periferico</div>
+        </div>
+
+        <!-- 5. MASSA MUSCOLARE TOTALE -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Massa Muscolare</span>
+            <i data-lucide="dumbbell" class="w-3.5 h-3.5 text-emerald-400"></i>
+          </div>
+          <div class="text-2xl font-black text-emerald-400"><span id="rf-muscle-kg">--</span> <span class="text-xs text-gray-400 font-normal">kg</span></div>
+          <div class="text-[11px] text-gray-400 mt-1">Massa contrattile attiva</div>
+        </div>
+
+        <!-- 6. MUSCOLO SCHELETRICO -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Muscolo Scheletrico</span>
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-emerald-400"></i>
+          </div>
+          <div class="text-2xl font-black text-white"><span id="rf-skel-muscle">--</span> <span class="text-xs text-gray-400 font-normal">%</span></div>
+          <div class="text-[11px] text-emerald-400 mt-1">Sensibilità insulinica periferica</div>
+        </div>
+
+        <!-- 7. PESO SENZA GRASSI (LBM) -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Massa Magra (LBM)</span>
+            <i data-lucide="shield" class="w-3.5 h-3.5 text-cyan-400"></i>
+          </div>
+          <div class="text-2xl font-black text-white"><span id="rf-fat-free">--</span> <span class="text-xs text-gray-400 font-normal">kg</span></div>
+          <div class="text-[11px] text-gray-400 mt-1">Organi + Muscolo + Ossa</div>
+        </div>
+
+        <!-- 8. ACQUA CORPOREA (MUCOSA & HYDRATION) -->
+        <div class="glass-card p-4 border-l-2 border-l-cyan-500 bg-cyan-950/10">
+          <div class="text-[11px] font-semibold text-cyan-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Acqua Corporea</span>
+            <i data-lucide="droplet" class="w-3.5 h-3.5 text-cyan-400"></i>
+          </div>
+          <div class="text-2xl font-black text-cyan-400"><span id="rf-water">--</span> <span class="text-xs text-gray-400 font-normal">%</span></div>
+          <div class="text-[11px] text-emerald-400 mt-1">Target idratazione mucose: &gt; 58%</div>
+        </div>
+
+        <!-- 9. PROTEINE % (TIGHT JUNCTIONS REPAIR) -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Proteine Corporee</span>
+            <i data-lucide="atom" class="w-3.5 h-3.5 text-violet-400"></i>
+          </div>
+          <div class="text-2xl font-black text-white"><span id="rf-protein">--</span> <span class="text-xs text-gray-400 font-normal">%</span></div>
+          <div class="text-[11px] text-violet-300 mt-1">Disponibilità riparazione tessuti</div>
+        </div>
+
+        <!-- 10. MASSA OSSEA (MINERALI) -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Massa Ossea</span>
+            <i data-lucide="bone" class="w-3.5 h-3.5 text-gray-400"></i>
+          </div>
+          <div class="text-2xl font-black text-white"><span id="rf-bone">--</span> <span class="text-xs text-gray-400 font-normal">kg</span></div>
+          <div class="text-[11px] text-gray-400 mt-1">Densità minerale scheletrica</div>
+        </div>
+
+        <!-- 11. METABOLISMO BASALE (BMR) -->
+        <div class="glass-card p-4">
+          <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>BMR (Basale)</span>
+            <i data-lucide="flame" class="w-3.5 h-3.5 text-rose-400"></i>
+          </div>
+          <div class="text-2xl font-black text-white"><span id="rf-bmr">--</span> <span class="text-xs text-gray-400 font-normal">kcal</span></div>
+          <div class="text-[11px] text-gray-400 mt-1">Spesa calorica mitocondriale</div>
+        </div>
+
+        <!-- 12. ETÀ METABOLICA (BIOLOGICAL AGE) -->
+        <div class="glass-card p-4 border-l-2 border-l-emerald-500 bg-emerald-950/10">
+          <div class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>Età Metabolica</span>
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+          </div>
+          <div class="text-2xl font-black text-emerald-400"><span id="rf-met-age">--</span> <span class="text-xs text-gray-400 font-normal">anni</span></div>
+          <div class="text-[11px] text-gray-300 mt-1">Indice di efficienza biologica</div>
+        </div>
+
+      </div>
+
+      <!-- ADVANCED RENPHO CHARTS ROW -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- CHART: FAT COMPARTMENTS (Viscerale vs Sottocutaneo vs Totale) -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-amber-400"></i>
+                Ripartizione Adiposa & Rischio Cardiovascolare
+              </h3>
+              <p class="text-xs text-gray-400">Grasso Viscerale (Liv.) vs Grasso Sottocutaneo (%) vs Totale (%)</p>
+            </div>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="fatCompartmentsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- CHART: LEAN QUALITY & HYDRATION -->
+        <div class="glass-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="droplet" class="w-4 h-4 text-cyan-400"></i>
+                Qualità Massa Magra & Idratazione Mucose
+              </h3>
+              <p class="text-xs text-gray-400">Muscolo Scheletrico (%) vs Acqua Corporea (%) vs Proteine (%)</p>
+            </div>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="leanQualityChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CLINICAL INTERPRETATIONS (DR. TRECROCI & BIOHACKING PRINCIPLES) -->
+      <div class="glass-card p-6 bg-gray-900/40">
+        <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i>
+          Interpretazione Clinico-Funzionale dei Tuoi Parametri Renpho
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-300">
+          <div class="p-4 rounded-xl bg-gray-950/60 border border-gray-800/80 space-y-1.5">
+            <h4 class="font-bold text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="shield-alert" class="w-4 h-4"></i> Grasso Viscerale (Liv. 6.0)
+            </h4>
+            <p>A differenza del grasso sottocutaneo, il grasso viscerale avvolge fegato e anse intestinali ed è la principale fonte di citochine infiammatorie ($IL-6$) e di stasi portale. Mantenere la cena leggera delle 20:00 è la strategia più rapida per portarlo a 5.0.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-gray-950/60 border border-gray-800/80 space-y-1.5">
+            <h4 class="font-bold text-cyan-400 flex items-center gap-1.5">
+              <i data-lucide="droplets" class="w-4 h-4"></i> Idratazione Cellulare (60.1%)
+            </h4>
+            <p>Un'acqua corporea superiore al 58% è un dato eccellente: indica che i tessuti mucosi (colon ed endotelio anale) ricevono idratazione sufficiente. Insieme al gel di lino al mattino, previene l'attrito fecale e le recidive emorroidarie.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-gray-950/60 border border-gray-800/80 space-y-1.5">
+            <h4 class="font-bold text-emerald-400 flex items-center gap-1.5">
+              <i data-lucide="zap" class="w-4 h-4"></i> Muscolo Scheletrico (53.8%)
+            </h4>
+            <p>Oltre il 53% di muscolo scheletrico garantisce un'eccellente capacità di stoccaggio del glicogeno. La colazione salata proteico-lipidica sfrutta questo potenziale per evitare sbalzi glicemici e cali d'energia mattutini.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: PROTOCOLLO & CHECKLIST GIORNALIERA                         -->
+    <!-- ================================================================= -->
+    <div id="tab-protocol" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card p-6">
+        <div class="flex items-center justify-between border-b border-gray-800 pb-4 mb-6">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+              Checklist Protocollo Nutrizionale di Oggi
+            </h2>
+            <p class="text-xs text-gray-400">Registra le azioni svolte per alimentare l'algoritmo N=1</p>
+          </div>
+          <input type="date" id="protocolDate" class="bg-gray-800 border border-gray-700 text-sm text-white px-3 py-1.5 rounded-lg focus:ring-1 focus:ring-emerald-500">
+        </div>
+
+        <div class="space-y-4">
+          
+          <label class="flex items-start p-4 rounded-xl bg-gray-900/60 border border-gray-800/80 cursor-pointer hover:border-gray-700 transition">
+            <input type="checkbox" id="chk-lino" class="w-5 h-5 mt-0.5 rounded bg-gray-800 border-gray-700 text-emerald-500 focus:ring-0">
+            <div class="ml-3.5">
+              <span class="text-sm font-semibold text-white flex items-center gap-2">
+                Ore 07:10 - Gel di Semi di Lino Dorati
+                <span class="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">Scudo Mucoso</span>
+              </span>
+              <p class="text-xs text-gray-400 mt-0.5">300 ml acqua tiepida + semi lasciati in ammollo la sera prima (emollienza anale & colon).</p>
+            </div>
+          </label>
+
+          <div class="p-4 rounded-xl bg-gray-900/60 border border-gray-800/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-white flex items-center gap-2">
+                Ore 07:15 - Colazione Abbondante (Centrale Energetica)
+              </span>
+              <span class="text-xs text-cyan-400 font-medium">Uscita ore 08:00</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex items-center p-3 rounded-lg border border-gray-800 bg-gray-950/40 cursor-pointer hover:border-emerald-500/50">
+                <input type="radio" name="breakfastType" value="salata" id="rad-salata" class="text-emerald-500">
+                <span class="ml-2.5 text-xs font-medium text-gray-200">🍳 Opzione Salata (Uova, Grano Saraceno, Avocado)</span>
+              </label>
+              <label class="flex items-center p-3 rounded-lg border border-gray-800 bg-gray-950/40 cursor-pointer hover:border-emerald-500/50">
+                <input type="radio" name="breakfastType" value="dolce" id="rad-dolce" class="text-emerald-500">
+                <span class="ml-2.5 text-xs font-medium text-gray-200">🥣 Opzione Dolce (Porridge, Mela cotta, Mandorle)</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="flex items-start p-4 rounded-xl bg-gray-900/60 border border-gray-800/80 cursor-pointer hover:border-gray-700 transition">
+            <input type="checkbox" id="chk-ruscoven" class="w-5 h-5 mt-0.5 rounded bg-gray-800 border-gray-700 text-emerald-500 focus:ring-0">
+            <div class="ml-3.5">
+              <span class="text-sm font-semibold text-white flex items-center gap-2">
+                Ore 16:30 - Ruscoven Plus (1 Opercolo con acqua)
+                <span class="text-[10px] px-2 py-0.5 bg-rose-500/10 text-rose-400 rounded-full border border-rose-500/20">Tono Venoso</span>
+              </span>
+              <p class="text-xs text-gray-400 mt-0.5">Rusco, Centella, Vite Rossa e Amamelide per decongestionare le emorroidi.</p>
+            </div>
+          </label>
+
+          <div class="p-4 rounded-xl bg-gray-900/60 border border-gray-800/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-white">
+                Ore 20:00 - Cena "Quasi Nulla" & Ultraleggera
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400">Orario effettivo:</span>
+                <input type="time" id="dinnerTimeInput" value="20:00" class="bg-gray-800 border border-gray-700 text-xs text-white px-2 py-1 rounded">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex items-center p-3 rounded-lg border border-gray-800 bg-gray-950/40 cursor-pointer hover:border-emerald-500/50">
+                <input type="radio" name="dinnerType" value="vellutata" id="rad-vellutata" class="text-emerald-500" checked>
+                <span class="ml-2.5 text-xs font-medium text-gray-200">🍵 Soluzione 1: Vellutata di zucca, carote e zucchine</span>
+              </label>
+              <label class="flex items-center p-3 rounded-lg border border-gray-800 bg-gray-950/40 cursor-pointer hover:border-emerald-500/50">
+                <input type="radio" name="dinnerType" value="brodo_pesce" id="rad-brodo" class="text-emerald-500">
+                <span class="ml-2.5 text-xs font-medium text-gray-200">🐟 Soluzione 2: Brodo caldo + Pesce bianco al vapore</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="flex items-start p-4 rounded-xl bg-gray-900/60 border border-gray-800/80 cursor-pointer hover:border-gray-700 transition">
+            <input type="checkbox" id="chk-sedivitax" class="w-5 h-5 mt-0.5 rounded bg-gray-800 border-gray-700 text-emerald-500 focus:ring-0">
+            <div class="ml-3.5">
+              <span class="text-sm font-semibold text-white flex items-center gap-2">
+                Ore 21:00 - Tisana Sedivitax Bio / Pura Malva (Senza Senna)
+                <span class="text-[10px] px-2 py-0.5 bg-violet-500/10 text-violet-400 rounded-full border border-violet-500/20">Glinfatico & Relax</span>
+              </span>
+              <p class="text-xs text-gray-400 mt-0.5">Distensione muscolatura liscia intestinale e preparazione al sonno profondo.</p>
+            </div>
+          </label>
+
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button onclick="saveProtocolData()" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg text-sm transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+            <i data-lucide="save" class="w-4 h-4"></i> Salva Protocollo di Oggi
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: DIARIO SINTOMI & ASSE INTESTINO-CERVELLO                   -->
+    <!-- ================================================================= -->
+    <div id="tab-symptoms" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card p-6">
+        <div class="border-b border-gray-800 pb-4 mb-6">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="smile" class="w-5 h-5 text-cyan-400"></i>
+            Check-in Serale Sintomi & Benessere (30 Secondi)
+          </h2>
+          <p class="text-xs text-gray-400">Valuta come ha risposto il tuo corpo oggi su una scala da 1 a 5</p>
+        </div>
+
+        <div class="space-y-6">
+          
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-semibold text-white">
+              <span>1. Benessere Intestinale & Digestione:</span>
+              <span id="val-digestione" class="text-emerald-400 font-bold text-base">4 / 5</span>
+            </div>
+            <input type="range" min="1" max="5" value="4" id="range-digestione" oninput="updateSliderLabel('digestione')" class="w-full">
+            <div class="flex justify-between text-[11px] text-gray-500">
+              <span>1: Molto gonfio / pesante</span>
+              <span>3: Normale</span>
+              <span>5: Perfetto, sgonfio, leggero</span>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-semibold text-white">
+              <span>2. Stato Emorroidario / Fastidio:</span>
+              <span id="val-emorroidi" class="text-emerald-400 font-bold text-base">4 / 5</span>
+            </div>
+            <input type="range" min="1" max="5" value="4" id="range-emorroidi" oninput="updateSliderLabel('emorroidi')" class="w-full">
+            <div class="flex justify-between text-[11px] text-gray-500">
+              <span>1: Infiammato / bruciore acuto</span>
+              <span>3: Leggero fastidio</span>
+              <span>5: Completamente asintomatico / sfiammato</span>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-semibold text-white">
+              <span>3. Energia Mentale & Focus:</span>
+              <span id="val-energia" class="text-cyan-400 font-bold text-base">4 / 5</span>
+            </div>
+            <input type="range" min="1" max="5" value="4" id="range-energia" oninput="updateSliderLabel('energia')" class="w-full">
+            <div class="flex justify-between text-[11px] text-gray-500">
+              <span>1: Nebbia mentale / stanchezza</span>
+              <span>3: Discreto</span>
+              <span>5: Massima lucidità e concentrazione</span>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-semibold text-white">
+              <span>4. Livello di Calma / Umore (PNEI):</span>
+              <span id="val-stress" class="text-violet-400 font-bold text-base">4 / 5</span>
+            </div>
+            <input type="range" min="1" max="5" value="4" id="range-stress" oninput="updateSliderLabel('stress')" class="w-full">
+            <div class="flex justify-between text-[11px] text-gray-500">
+              <span>1: Molto teso / stressato</span>
+              <span>3: Moderato</span>
+              <span>5: Calmo, presente, rilassato</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <label class="text-xs font-semibold text-gray-300">Note sulla giornata (pranzo libero, sensazioni, variazioni):</label>
+            <textarea id="symptomNotes" rows="2" placeholder="Es. A pranzo mangiato riso e salmone, digestione ottima, zero pesantezza." class="w-full bg-gray-900/80 border border-gray-800 rounded-xl p-3 text-xs text-white placeholder-gray-600 focus:ring-1 focus:ring-cyan-500"></textarea>
+          </div>
+
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button onclick="saveSymptomsData()" class="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold rounded-lg text-sm transition shadow-lg shadow-cyan-500/20 flex items-center gap-2">
+            <i data-lucide="save" class="w-4 h-4"></i> Registra Sintomi di Oggi
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 5: LABORATORIO N=1 & CORRELAZIONI BIOHACKING                  -->
+    <!-- ================================================================= -->
+    <div id="tab-correlations" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card p-6">
+        <div class="border-b border-gray-800 pb-4 mb-6">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="cpu" class="w-5 h-5 text-violet-400"></i>
+            Laboratorio di Correlazione "N=1"
+          </h2>
+          <p class="text-xs text-gray-400">Analisi automatica causa-effetto tra le tue abitudini alimentari e i tuoi dati biometrici</p>
+        </div>
+
+        <div id="correlationCardsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        </div>
+
+        <div class="glass-card p-5 bg-gray-900/40">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <i data-lucide="git-commit" class="w-4 h-4 text-emerald-400"></i>
+            Matrice Causa-Effetto Personale
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left text-gray-300">
+              <thead class="bg-gray-800/60 text-gray-400 uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th class="p-3">Abitudine / Variabile</th>
+                  <th class="p-3">Impatto sul Sonno</th>
+                  <th class="p-3">Impatto su RHR (Cuore)</th>
+                  <th class="p-3">Impatto Emorroidi & Intestino</th>
+                  <th class="p-3">Stato Scientifico</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-800/60">
+                <tr>
+                  <td class="p-3 font-semibold text-white">Cena leggera entro le 20:00</td>
+                  <td class="p-3 text-emerald-400 font-bold">+20% Sonno Profondo</td>
+                  <td class="p-3 text-emerald-400 font-bold">-4 bpm a riposo</td>
+                  <td class="p-3 text-cyan-400">Zero fermentazione</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Validato</span></td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">Gel Semi di Lino + Ruscoven</td>
+                  <td class="p-3 text-gray-400">Neutro</td>
+                  <td class="p-3 text-cyan-400 font-medium">Miglior tono venoso</td>
+                  <td class="p-3 text-emerald-400 font-bold">-70% Fastidio emorroidario</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Validato</span></td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">Colazione Salata (Uova/Avocado)</td>
+                  <td class="p-3 text-gray-400">Stabilità serale</td>
+                  <td class="p-3 text-cyan-400 font-medium">Zero picchi glicemici</td>
+                  <td class="p-3 text-emerald-400 font-bold">+40% Focus & Sazietà</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Validato</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 6: RESPIRAZIONE VAGO & COERENZA CARDIACA                      -->
+    <!-- ================================================================= -->
+    <div id="tab-breathing" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card p-6 flex flex-col items-center justify-center text-center">
+        <div class="mb-6 max-w-md">
+          <h2 class="text-lg font-bold text-white flex items-center justify-center gap-2">
+            <i data-lucide="wind" class="w-5 h-5 text-violet-400"></i>
+            Stimolazione Vagale & Coerenza
+          </h2>
+          <p class="text-xs text-gray-400 mt-1">Regola il sistema nervoso autonomo, abbassa il cortisolo e prepara il cuore al sonno profondo</p>
+        </div>
+
+        <div class="flex gap-2 p-1 bg-gray-900/80 rounded-xl border border-gray-800 mb-8">
+          <button onclick="setBreathingMode('478')" id="btn-mode-478" class="px-4 py-2 text-xs font-bold rounded-lg bg-violet-600 text-white transition">
+            Tecnica 4-7-8 (Sonno & Calma)
+          </button>
+          <button onclick="setBreathingMode('55')" id="btn-mode-55" class="px-4 py-2 text-xs font-medium text-gray-400 hover:text-white rounded-lg transition">
+            Coerenza Cardiaca 5-5 (Tono Vagale)
+          </button>
+        </div>
+
+        <div class="my-6 relative flex items-center justify-center">
+          <div id="breathingRing" class="breathing-ring">
+            <div class="text-center z-10">
+              <span id="breathingPhase" class="text-base font-extrabold uppercase tracking-widest text-violet-300 block mb-1">Pronto</span>
+              <span id="breathingTimer" class="text-4xl font-black text-white">4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 mt-6">
+          <button onclick="toggleBreathing()" id="btnBreathingToggle" class="px-8 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-violet-500/25 flex items-center gap-2">
+            <i data-lucide="play" class="w-4 h-4"></i> Inizia Sessione
+          </button>
+          <button onclick="toggleAudioChime()" id="btnAudioToggle" class="p-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl border border-gray-700 transition" title="Attiva/Disattiva Suono Suono Dolce">
+            <i data-lucide="volume-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="mt-6 text-xs text-gray-500 flex items-center gap-4">
+          <span>Cicli completati stasera: <strong id="completedCyclesCount" class="text-violet-400">0</strong></span>
+          <span>•</span>
+          <span>Consigliati: 4 - 8 cicli prima di dormire</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 7: RICETTARIO & MEAL PREP RAPIDO                              -->
+    <!-- ================================================================= -->
+    <div id="tab-recipes" class="tab-content hidden space-y-6">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="glass-card p-6 border-l-4 border-l-amber-500">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="soup" class="w-4 h-4 text-amber-400"></i>
+              Vellutata Decongestionante (Domenica & Mercoledì)
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20">Batch Cooking</span>
+          </div>
+          <p class="text-xs text-gray-300 mb-4">Base liquida calda per la cena delle 20:00 (zero carichi digestivi notturni).</p>
+          <div class="text-xs space-y-2 bg-gray-900/60 p-3 rounded-lg border border-gray-800 text-gray-300">
+            <p><strong>Ingredienti:</strong> 800g zucchine, 600g carote, 500g zucca, 1 foglia di alloro, acqua a filo.</p>
+            <p><strong>Procedimento:</strong> Fai sobbollire per 20 min senza soffritti. Rimuovi alloro e frulla con minipimer finemente. Conserva in vetro in frigo per 4 giorni.</p>
+            <p class="text-amber-300"><strong>Al momento di servire:</strong> Scalda 1 ciotola, aggiungi a crudo 1 cucchiaio di Olio EVO e 1 cucchiaio di semi di canapa/zucca decorticati.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 border-l-4 border-l-cyan-500">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="apple" class="w-4 h-4 text-cyan-400"></i>
+              Mele Cotte per il Porridge Mattutino
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-full border border-cyan-500/20">Pectina Riparatrice</span>
+          </div>
+          <p class="text-xs text-gray-300 mb-4">Nutrimento chiave per la produzione di *acido butirrico* da parte del microbiota.</p>
+          <div class="text-xs space-y-2 bg-gray-900/60 p-3 rounded-lg border border-gray-800 text-gray-300">
+            <p><strong>Ingredienti:</strong> 3-4 mele dolci sbucciate, 2 cucchiai d'acqua, abbondante cannella dolce in polvere.</p>
+            <p><strong>Procedimento:</strong> Cuoci a cubetti a fuoco lento con coperchio per 10 minuti. Conserva in barattolo di vetro in frigo.</p>
+            <p class="text-cyan-300"><strong>Al mattino dolce:</strong> Scalda fiocchi d'avena con bevanda di mandorla (3 min), unisci 2 cucchiai di mele cotte e 1 cucchiaio di crema di mandorle pelate 100%.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 border-l-4 border-l-emerald-500">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="egg" class="w-4 h-4 text-emerald-400"></i>
+              Colazione Salata Express (10 Minuti)
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">Focus & Rutina</span>
+          </div>
+          <div class="text-xs space-y-2 bg-gray-900/60 p-3 rounded-lg border border-gray-800 text-gray-300">
+            <p>• <strong>2 Fette di Pane di Grano Saraceno:</strong> Tostate bene nel tostapane (ricco di Rutina anti-emorroidaria).</p>
+            <p>• <strong>2-3 Uova Biologiche:</strong> Cotte all'occhio in padella coperta per 3 min (mantenere il tuorlo morbido e digeribile).</p>
+            <p>• <strong>1/2 Avocado Maturo:</strong> Schiacciato sul pane con un pizzico di sale e olio EVO.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 border-l-4 border-l-violet-500">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="coffee" class="w-4 h-4 text-violet-400"></i>
+              Guida Rapida Integrazione & Tisane
+            </h3>
+            <span class="text-[10px] px-2 py-0.5 bg-violet-500/10 text-violet-400 rounded-full border border-violet-500/20">Timing Perfetto</span>
+          </div>
+          <div class="text-xs space-y-2 bg-gray-900/60 p-3 rounded-lg border border-gray-800 text-gray-300">
+            <p>• <strong>Pomeriggio (16:30 - 17:30):</strong> 1 opercolo di *Ruscoven Plus* con un bel bicchiere d'acqua.</p>
+            <p>• <strong>Sera (21:00 - 21:30):</strong> 1 bustina di *Aboca Sedivitax* o *Pura Malva* in 200ml di acqua bollente, infusione 7 minuti con coperchio.</p>
+            <p class="text-rose-300"><strong>Regola fissa:</strong> Mai assumere tisane con Senna (*Cassia*) o lassativi stimolanti.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 8: IMPORTAZIONE DATI & GESTIONE FILE                          -->
+    <!-- ================================================================= -->
+    <div id="tab-import" class="tab-content hidden space-y-6">
+      
+      <!-- WI-FI SMARTPHONE SYNC BANNER -->
+      <div class="glass-card p-6 border-l-4 border-l-cyan-500 bg-gradient-to-r from-cyan-950/30 via-gray-900/50 to-transparent flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-start gap-4">
+          <div class="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <i data-lucide="smartphone" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              Sincronizzazione Wireless Wi-Fi dal tuo Smartphone Android
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Zero Cavi</span>
+            </h3>
+            <p class="text-xs text-gray-300 mt-1">
+              Apri <strong>Chrome sul tuo telefono</strong> (collegato al Wi-Fi di casa) e vai all'indirizzo:  
+              <a href="http://192.168.1.76:3333" target="_blank" class="text-cyan-400 font-mono font-bold text-sm underline ml-1">http://192.168.1.76:3333</a>
+            </p>
+            <p class="text-[11px] text-gray-400 mt-1">
+              💡 <em>Suggerimento:</em> Su Chrome del telefono tocca i 3 puntini in alto $\rightarrow$ <strong>"Aggiungi a schermata Home"</strong> per avere l'icona dell'app sul telefono!
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+          <span class="text-xs bg-gray-950 border border-cyan-500/30 text-cyan-300 font-mono px-3 py-2 rounded-xl text-center w-full sm:w-auto">
+            IP: 192.168.1.76:3333
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="glass-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
+              <i data-lucide="scale" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white">Importa File Renpho (.XLS / .CSV)</h3>
+              <p class="text-xs text-gray-400">Trascina il file esportato dall'app Renpho</p>
+            </div>
+          </div>
+
+          <div id="dropzoneRenpho" class="dropzone rounded-xl p-8 text-center cursor-pointer mb-4">
+            <i data-lucide="file-spreadsheet" class="w-8 h-8 text-amber-400 mx-auto mb-2"></i>
+            <p class="text-xs font-semibold text-white">Trascina qui il file .XLS o .CSV di Renpho</p>
+            <p class="text-[11px] text-gray-500 mt-1">oppure clicca per selezionarlo dal computer</p>
+            <input type="file" id="fileRenphoInput" accept=".csv,.xls,.xlsx,.txt" class="hidden">
+          </div>
+          <div id="renphoStatus" class="text-xs text-emerald-400 hidden font-medium p-2.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20"></div>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400">
+              <i data-lucide="watch" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white">Importa Huawei Health (.ZIP / .JSON)</h3>
+              <p class="text-xs text-gray-400">Trascina il file scaricato dal Centro Privacy</p>
+            </div>
+          </div>
+
+          <div id="dropzoneHuawei" class="dropzone rounded-xl p-8 text-center cursor-pointer mb-4">
+            <i data-lucide="archive" class="w-8 h-8 text-cyan-400 mx-auto mb-2"></i>
+            <p class="text-xs font-semibold text-white">Trascina qui il file .ZIP o .JSON di Huawei</p>
+            <p class="text-[11px] text-gray-500 mt-1">oppure clicca per selezionarlo dal computer</p>
+            <input type="file" id="fileHuaweiInput" accept=".zip,.json,.txt" class="hidden">
+          </div>
+          <div id="huaweiStatus" class="text-xs text-emerald-400 hidden font-medium p-2.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20"></div>
+        </div>
+
+      </div>
+
+      <div class="glass-card p-6">
+        <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i>
+          Inserimento Manuale Rapido (Senza esportare file)
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div>
+            <label class="text-[11px] text-gray-400 block mb-1">Data:</label>
+            <input type="date" id="manualDate" class="w-full bg-gray-800 border border-gray-700 text-xs text-white p-2 rounded-lg">
+          </div>
+          <div>
+            <label class="text-[11px] text-gray-400 block mb-1">Peso (kg):</label>
+            <input type="number" step="0.1" id="manualWeight" placeholder="72.2" class="w-full bg-gray-800 border border-gray-700 text-xs text-white p-2 rounded-lg">
+          </div>
+          <div>
+            <label class="text-[11px] text-gray-400 block mb-1">Grasso Viscerale:</label>
+            <input type="number" step="0.5" id="manualVisceral" placeholder="6.0" class="w-full bg-gray-800 border border-gray-700 text-xs text-white p-2 rounded-lg">
+          </div>
+          <div>
+            <label class="text-[11px] text-gray-400 block mb-1">Punteggio Sonno:</label>
+            <input type="number" id="manualSleepScore" placeholder="84" class="w-full bg-gray-800 border border-gray-700 text-xs text-white p-2 rounded-lg">
+          </div>
+          <div>
+            <label class="text-[11px] text-gray-400 block mb-1">Sonno Profondo (%):</label>
+            <input type="number" id="manualDeepSleep" placeholder="22" class="w-full bg-gray-800 border border-gray-700 text-xs text-white p-2 rounded-lg">
+          </div>
+          <div>
+            <label class="text-[11px] text-gray-400 block mb-1">Battito Riposo (bpm):</label>
+            <input type="number" id="manualRHR" placeholder="58" class="w-full bg-gray-800 border border-gray-700 text-xs text-white p-2 rounded-lg">
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button onclick="saveManualBiometrics()" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-xs rounded-lg transition">
+            Aggiungi Misurazioni
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 9: REPORT MEDICO & CARDIOLOGICO (PDF)                         -->
+    <!-- ================================================================= -->
+    <div id="tab-report" class="tab-content hidden space-y-6">
+      
+      <div class="glass-card p-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-800 pb-4 mb-6 gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-check" class="w-5 h-5 text-emerald-400"></i>
+              Report Clinico & Funzionale di Luca
+            </h2>
+            <p class="text-xs text-gray-400">Documento riassuntivo stampabile per controlli medici o cardiologici</p>
+          </div>
+          <button onclick="window.print()" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+            <i data-lucide="printer" class="w-4 h-4"></i> Stampa / Salva in PDF
+          </button>
+        </div>
+
+        <div id="medicalReportContent" class="space-y-6 text-gray-200">
+          <div class="border border-gray-800 rounded-xl p-6 bg-gray-950/60">
+            <div class="flex justify-between items-start border-b border-gray-800 pb-4 mb-4">
+              <div>
+                <h3 class="text-base font-extrabold text-white">PAZIENTE: LUCA</h3>
+                <p class="text-xs text-gray-400">Protocollo: Riparazione Intestinale, Crononutrizione & Prevenzione Cardiovascolare</p>
+              </div>
+              <div class="text-right text-xs text-gray-400">
+                <p>Data Generazione: <strong id="reportDate" class="text-white">--</strong></p>
+                <p>Dispositivi: Huawei Watch Fit 3 & Renpho Smart Scale</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-center">
+              <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+                <span class="text-[11px] text-gray-400 block">Frequenza Riposo Media:</span>
+                <span id="rep-rhr" class="text-xl font-bold text-emerald-400">-- bpm</span>
+              </div>
+              <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+                <span class="text-[11px] text-gray-400 block">Sonno Profondo Medio:</span>
+                <span id="rep-deep-sleep" class="text-xl font-bold text-cyan-400">-- %</span>
+              </div>
+              <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+                <span class="text-[11px] text-gray-400 block">Grasso Viscerale:</span>
+                <span id="rep-visceral" class="text-xl font-bold text-amber-400">Liv. --</span>
+              </div>
+              <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+                <span class="text-[11px] text-gray-400 block">Aderenza Protocollo:</span>
+                <span id="rep-adherence" class="text-xl font-bold text-emerald-400">92%</span>
+              </div>
+            </div>
+
+            <div class="space-y-3 text-xs text-gray-300">
+              <h4 class="font-bold text-white uppercase text-[11px] tracking-wider border-b border-gray-800 pb-1">Osservazioni Clinico-Funzionali:</h4>
+              <p>• <strong>Asse Intestino-Microcircolo:</strong> Netta riduzione della sintomatologia infiammatoria ed emorroidaria in correlazione con l'assunzione mattutina di mucillagini di lino e fitoterapia flebotonica pomeridiana (Ruscoven Plus).</p>
+              <p>• <strong>Detossificazione Glinfatica Notturna:</strong> L'anticipo e l'alleggerimento del pasto serale (cena leggera entro le ore 20:00) ha prodotto un significativo aumento della frazione di sonno a onde lente (sonno profondo) e una riduzione della frequenza cardiaca basale notturna.</p>
+              <p>• <strong>Composizione Corporea & Rischio Metabolico:</strong> Andamento stabile del peso con tendenza alla riduzione del livello di adiposità viscerale.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- SCRIPTS -->
+  <script src="js/charts.js"></script>
+  <script src="js/parsers.js"></script>
+  <script src="js/correlations.js"></script>
+  <script src="js/breathing.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

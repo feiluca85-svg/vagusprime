@@ -1,0 +1,98 @@
+/* --- VAGUSPRIME STYLESHEET (DARK THEME & GLASSMORPHISM) --- */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #090d16;
+  color: #f3f4f6;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Dropzone Styles */
+.dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.4);
+  transition: all 0.2s ease;
+}
+
+.dropzone:hover, .dropzone.dragover {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.06);
+}
+
+/* Breathing Visualizer Ring */
+.breathing-ring {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, rgba(9, 13, 22, 0.9) 70%);
+  border: 4px solid #8b5cf6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.5s ease;
+}
+
+.breathing-ring.inhale {
+  transform: scale(1.35);
+  border-color: #06b6d4;
+  box-shadow: 0 0 60px rgba(6, 182, 212, 0.5);
+}
+
+.breathing-ring.hold {
+  transform: scale(1.35);
+  border-color: #8b5cf6;
+  box-shadow: 0 0 70px rgba(139, 92, 246, 0.6);
+}
+
+.breathing-ring.exhale {
+  transform: scale(0.9);
+  border-color: #10b981;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+}
+
+/* Hide scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Print Optimization */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print, header, nav {
+    display: none !important;
+  }
+  .glass-card {
+    background: white !important;
+    border: 1px solid #ddd !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  #tab-report {
+    display: block !important;
+  }
+}
