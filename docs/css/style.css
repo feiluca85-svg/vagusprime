@@ -7,6 +7,19 @@ body {
   background-color: #090d16;
   color: #f3f4f6;
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+/* Pull to Refresh Indicator */
+#pullToRefreshIndicator {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
+}
+
+#pullToRefreshIndicator.pulling {
+  opacity: 1;
 }
 
 /* Glassmorphism Cards */
@@ -22,6 +35,17 @@ body {
 
 .glass-card:hover {
   border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Global Dropzone Overlay */
+#globalDropOverlay {
+  display: none;
+  pointer-events: none;
+}
+
+#globalDropOverlay.active {
+  display: flex;
+  pointer-events: auto;
 }
 
 /* Dropzone Styles */

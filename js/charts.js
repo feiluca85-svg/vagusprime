@@ -1,8 +1,9 @@
-// --- CHARTS.JS (MOTORE GRAFICI INTERATTIVI CHART.JS) ---
+// --- VAGUSPRIME: CHARTS.JS (MOTORE GRAFICI INTERATTIVI CHART.JS) ---
 
 let sleepChartInstance = null;
 let weightChartInstance = null;
 let symptomsChartInstance = null;
+let heartRateChartInstance = null;
 let fatCompartmentsChartInstance = null;
 let leanQualityChartInstance = null;
 
@@ -24,7 +25,7 @@ function initCharts(days) {
     return `${parts[2]}/${parts[1]}`;
   });
 
-  // 1. SLEEP & RHR CHART (Dual Axis)
+  // 1. SLEEP CHART (Sonno Profondo & Punteggio)
   const ctxSleep = document.getElementById('sleepChart');
   if (ctxSleep) {
     if (sleepChartInstance) sleepChartInstance.destroy();
@@ -38,24 +39,22 @@ function initCharts(days) {
             label: 'Sonno Profondo (%)',
             data: days.map(d => d.deepSleepPercent || 0),
             borderColor: COLORS.cyan,
-            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+            backgroundColor: 'rgba(6, 182, 212, 0.12)',
             fill: true,
             tension: 0.35,
-            yAxisID: 'yLeft',
             borderWidth: 2.5,
             pointRadius: 4,
             pointBackgroundColor: COLORS.cyan
           },
           {
-            label: 'Battito Riposo (bpm)',
-            data: days.map(d => d.restingHR || 0),
-            borderColor: COLORS.rose,
-            borderDash: [4, 4],
+            label: 'Punteggio Sonno (/100)',
+            data: days.map(d => d.sleepScore || 80),
+            borderColor: COLORS.violet,
+            borderDash: [3, 3],
             tension: 0.35,
-            yAxisID: 'yRight',
             borderWidth: 2,
             pointRadius: 4,
-            pointBackgroundColor: COLORS.rose
+            pointBackgroundColor: COLORS.violet
           }
         ]
       },
@@ -68,22 +67,64 @@ function initCharts(days) {
         },
         scales: {
           x: { grid: { color: COLORS.grid }, ticks: { color: COLORS.text, font: { size: 10 } } },
-          yLeft: {
-            type: 'linear',
-            position: 'left',
+          y: {
             grid: { color: COLORS.grid },
             ticks: { color: COLORS.cyan, font: { size: 10 } },
-            title: { display: true, text: 'Sonno Profondo %', color: COLORS.cyan, font: { size: 10 } },
-            min: 10,
-            max: 35
+            title: { display: true, text: 'Percentuale / Score', color: COLORS.cyan, font: { size: 10 } },
+            min: 15,
+            max: 100
+          }
+        }
+      }
+    });
+  }
+
+  // 2. DEDICATED HEART RATE CHART (Battito a Riposo RHR & Range Notturno)
+  const ctxHR = document.getElementById('heartRateChart');
+  if (ctxHR) {
+    if (heartRateChartInstance) heartRateChartInstance.destroy();
+
+    heartRateChartInstance = new Chart(ctxHR, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Battito a Riposo RHR (bpm)',
+            data: days.map(d => d.restingHR || 54),
+            borderColor: COLORS.rose,
+            backgroundColor: 'rgba(244, 63, 94, 0.12)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointBackgroundColor: COLORS.rose
           },
-          yRight: {
-            type: 'linear',
-            position: 'right',
-            grid: { display: false },
+          {
+            label: 'Target Longevità (< 58 bpm)',
+            data: days.map(() => 58),
+            borderColor: 'rgba(16, 185, 129, 0.5)',
+            borderDash: [4, 4],
+            borderWidth: 1.5,
+            pointRadius: 0,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: COLORS.text, font: { size: 11 } } }
+        },
+        scales: {
+          x: { grid: { color: COLORS.grid }, ticks: { color: COLORS.text, font: { size: 10 } } },
+          y: {
+            grid: { color: COLORS.grid },
             ticks: { color: COLORS.rose, font: { size: 10 } },
-            title: { display: true, text: 'RHR (bpm)', color: COLORS.rose, font: { size: 10 } },
-            min: 50,
+            title: { display: true, text: 'Frequenza (bpm)', color: COLORS.rose, font: { size: 10 } },
+            min: 45,
             max: 75
           }
         }
@@ -91,7 +132,7 @@ function initCharts(days) {
     });
   }
 
-  // 2. WEIGHT & VISCERAL FAT CHART
+  // 3. WEIGHT & VISCERAL FAT CHART
   const ctxWeight = document.getElementById('weightChart');
   if (ctxWeight) {
     if (weightChartInstance) weightChartInstance.destroy();
@@ -155,7 +196,7 @@ function initCharts(days) {
     });
   }
 
-  // 3. SYMPTOMS CHART
+  // 4. SYMPTOMS CHART
   const ctxSymptoms = document.getElementById('symptomsChart');
   if (ctxSymptoms) {
     if (symptomsChartInstance) symptomsChartInstance.destroy();
@@ -167,15 +208,15 @@ function initCharts(days) {
         datasets: [
           {
             label: 'Intestino & Sgonfiezze',
-            data: days.map(d => d.digestioneScore || 3),
+            data: days.map(d => d.digestioneScore || 4),
             borderColor: COLORS.emerald,
             tension: 0.3,
             borderWidth: 2,
             pointRadius: 4
           },
           {
-            label: 'Stato Emorroidario',
-            data: days.map(d => d.emorroidiScore || 3),
+            label: 'Stato Microcircolo / Emorroidi',
+            data: days.map(d => d.emorroidiScore || 4),
             borderColor: COLORS.cyan,
             tension: 0.3,
             borderWidth: 2,
@@ -183,7 +224,7 @@ function initCharts(days) {
           },
           {
             label: 'Energia Mentale',
-            data: days.map(d => d.energiaMentaleScore || 3),
+            data: days.map(d => d.energiaMentaleScore || 4),
             borderColor: COLORS.amber,
             tension: 0.3,
             borderWidth: 2,
@@ -212,7 +253,7 @@ function initCharts(days) {
     });
   }
 
-  // 4. RENPHO CHART 1: FAT COMPARTMENTS (Viscerale vs Sottocutaneo vs Totale)
+  // 5. FAT COMPARTMENTS CHART
   const ctxFat = document.getElementById('fatCompartmentsChart');
   if (ctxFat) {
     if (fatCompartmentsChartInstance) fatCompartmentsChartInstance.destroy();
@@ -224,7 +265,7 @@ function initCharts(days) {
         datasets: [
           {
             label: 'Grasso Corporeo Totale (%)',
-            data: days.map(d => d.bodyFat || 16.8),
+            data: days.map(d => d.bodyFat || 16.7),
             borderColor: COLORS.amber,
             backgroundColor: 'rgba(245, 158, 11, 0.08)',
             fill: true,
@@ -234,7 +275,7 @@ function initCharts(days) {
           },
           {
             label: 'Grasso Sottocutaneo (%)',
-            data: days.map(d => d.subcutaneousFat || 14.7),
+            data: days.map(d => d.subcutaneousFat || 14.6),
             borderColor: COLORS.violet,
             borderDash: [3, 3],
             tension: 0.3,
@@ -265,7 +306,6 @@ function initCharts(days) {
             position: 'left',
             grid: { color: COLORS.grid },
             ticks: { color: COLORS.amber, font: { size: 10 } },
-            title: { display: true, text: 'Percentuale (%)', color: COLORS.amber, font: { size: 10 } },
             min: 10,
             max: 25
           },
@@ -274,7 +314,6 @@ function initCharts(days) {
             position: 'right',
             grid: { display: false },
             ticks: { color: COLORS.rose, font: { size: 10 } },
-            title: { display: true, text: 'Liv. Viscerale', color: COLORS.rose, font: { size: 10 } },
             min: 1,
             max: 12
           }
@@ -283,7 +322,7 @@ function initCharts(days) {
     });
   }
 
-  // 5. RENPHO CHART 2: LEAN QUALITY & HYDRATION
+  // 6. LEAN QUALITY & HYDRATION CHART
   const ctxLean = document.getElementById('leanQualityChart');
   if (ctxLean) {
     if (leanQualityChartInstance) leanQualityChartInstance.destroy();
@@ -295,7 +334,7 @@ function initCharts(days) {
         datasets: [
           {
             label: 'Acqua Corporea (%)',
-            data: days.map(d => d.bodyWater || 60.1),
+            data: days.map(d => d.bodyWater || 60.2),
             borderColor: COLORS.cyan,
             backgroundColor: 'rgba(6, 182, 212, 0.08)',
             fill: true,
@@ -304,14 +343,14 @@ function initCharts(days) {
           },
           {
             label: 'Muscolo Scheletrico (%)',
-            data: days.map(d => d.skeletalMuscle || 53.8),
+            data: days.map(d => d.skeletalMuscle || 53.9),
             borderColor: COLORS.emerald,
             tension: 0.3,
             borderWidth: 2.5
           },
           {
             label: 'Proteine (%)',
-            data: days.map(d => d.protein || 19.0),
+            data: days.map(d => d.protein || 19.1),
             borderColor: COLORS.violet,
             borderDash: [3, 3],
             tension: 0.3,
@@ -331,7 +370,6 @@ function initCharts(days) {
           y: {
             grid: { color: COLORS.grid },
             ticks: { color: COLORS.text, font: { size: 10 } },
-            title: { display: true, text: 'Percentuale (%)', color: COLORS.text, font: { size: 10 } },
             min: 15,
             max: 70
           }

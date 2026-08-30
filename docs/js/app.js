@@ -1,8 +1,9 @@
-// --- VAGUSPRIME: APP.JS (BIOMETRIC TOUCH ID / FINGERPRINT ZERO-KNOWLEDGE) ---
+// --- VAGUSPRIME: APP.JS (VERSION v1.2.0 - ZERO-KNOWLEDGE BIOHACKING ENGINE) ---
 
+const APP_VERSION = 'v1.2.0';
+const APP_BUILD_DATE = '30 Agosto 2026';
 const STORAGE_KEY = 'vagusprime_blueprint_db';
-const BIOMETRIC_KEY = 'vagusprime_biometric_enabled';
-const CREDENTIAL_ID_KEY = 'vagusprime_cred_id';
+const PRIVACY_LOCK_KEY = 'vagusprime_privacy_lock';
 
 window.AppState = {
   db: null,
@@ -276,7 +277,7 @@ function getDefaultDatabase() {
         emorroidiScore: 5,
         energiaMentaleScore: 5,
         stressUmoreScore: 5,
-        notes: "Dati reali: Punteggio sonno 88, Profondo 23%, RHR 53 bpm."
+        notes: "Punteggio sonno 88, Profondo 23%, RHR 53 bpm (42-65 bpm notturno)."
       }
     ],
     lastUpdated: new Date().toISOString()
@@ -304,13 +305,17 @@ function saveLocalDB(db) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Biometric Lock Check
-  checkBiometricLock();
+  // Setup gestures & options
+  setupPullToRefresh();
+  setupGlobalDragDrop();
+  checkPrivacyLock();
 
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const todayDate = new Date();
   const dateFormatted = todayDate.toLocaleDateString('it-IT', options);
   setTxt('currentDateDisplay', dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1));
+  setTxt('appVersionDisplay', APP_VERSION);
+  setTxt('optionsVersionBadge', `${APP_VERSION} (Build ${APP_BUILD_DATE})`);
 
   const todayIso = todayDate.toISOString().split('T')[0];
   const pDate = document.getElementById('protocolDate');
@@ -324,67 +329,137 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) lucide.createIcons();
 });
 
-// --- BIOMETRIC / WEBAUTHN AUTHENTICATION ---
+// --- PULL TO REFRESH & SYNC GESTURE ---
+function setupPullToRefresh() {
+  let touchStartY = 0;
+  let touchDiffY = 0;
+  const indicator = document.getElementById('pullToRefreshIndicator');
+  const spinner = document.getElementById('pullSpinner');
+  const text = document.getElementById('pullText');
 
-function checkBiometricLock() {
-  const isEnabled = localStorage.getItem(BIOMETRIC_KEY) === 'true';
-  const bioModal = document.getElementById('biometricLockModal');
-  if (isEnabled && bioModal) {
-    bioModal.classList.remove('hidden');
-    // Auto-prompt fingerprint on load
-    setTimeout(() => {
-      authenticateBiometric();
-    }, 400);
+  window.addEventListener('touchstart', (e) => {
+    if (window.scrollY === 0) {
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (touchStartY > 0 && window.scrollY === 0) {
+      touchDiffY = e.touches[0].clientY - touchStartY;
+      if (touchDiffY > 0) {
+        const height = Math.min(touchDiffY * 0.45, 80);
+        if (indicator) {
+          indicator.style.height = `${height}px`;
+          indicator.classList.add('pulling');
+          if (height > 55) {
+            text.textContent = 'Rilascia per sincronizzare Renpho & Huawei';
+            spinner.style.transform = `rotate(${height * 4}deg)`;
+          } else {
+            text.textContent = 'Trascina verso il basso per sincronizzare...';
+          }
+        }
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => {
+    if (touchDiffY > 70 && window.scrollY === 0) {
+      triggerAppSync();
+    }
+    if (indicator) {
+      indicator.style.height = '0px';
+      indicator.classList.remove('pulling');
+    }
+    touchStartY = 0;
+    touchDiffY = 0;
+  });
+}
+
+window.triggerAppSync = function() {
+  const syncToast = document.getElementById('syncToast');
+  if (syncToast) {
+    syncToast.classList.remove('hidden');
+    setTimeout(() => syncToast.classList.add('hidden'), 2200);
+  }
+  // Reload database and re-render charts
+  window.AppState.db = loadLocalDB();
+  renderAll();
+  if (navigator.vibrate) navigator.vibrate(50);
+};
+
+// --- GLOBAL DRAG AND DROP ANYWHERE ON PAGE ---
+function setupGlobalDragDrop() {
+  const overlay = document.getElementById('globalDropOverlay');
+  let dragCounter = 0;
+
+  window.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    dragCounter++;
+    if (overlay) overlay.classList.add('active');
+  });
+
+  window.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    dragCounter--;
+    if (dragCounter <= 0 && overlay) {
+      overlay.classList.remove('active');
+      dragCounter = 0;
+    }
+  });
+
+  window.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dragCounter = 0;
+    if (overlay) overlay.classList.remove('active');
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const name = file.name.toLowerCase();
+      if (name.includes('renpho') || name.endsWith('.xls') || name.endsWith('.xlsx') || name.endsWith('.csv')) {
+        if (window.handleRenphoClient) window.handleRenphoClient(file);
+      } else if (name.includes('huawei') || name.endsWith('.json') || name.endsWith('.zip') || name.endsWith('.jpg') || name.endsWith('.png')) {
+        if (window.handleHuaweiClient) window.handleHuaweiClient(file);
+      } else {
+        if (window.handleRenphoClient) window.handleRenphoClient(file);
+      }
+    }
+  });
+}
+
+// --- PRIVACY LOCK (ONE-TOUCH & DISCRETE) ---
+function checkPrivacyLock() {
+  const isLocked = localStorage.getItem(PRIVACY_LOCK_KEY) === 'true';
+  const modal = document.getElementById('privacyLockModal');
+  if (isLocked && modal) {
+    modal.classList.remove('hidden');
   }
 }
 
-window.authenticateBiometric = async function() {
-  const errEl = document.getElementById('biometricError');
-  if (errEl) errEl.classList.add('hidden');
+window.unlockPrivacyScreen = function() {
+  document.getElementById('privacyLockModal')?.classList.add('hidden');
+};
 
-  if (window.PublicKeyCredential) {
-    try {
-      // Challenge dummy for local device biometric verification
-      const challenge = new Uint8Array(32);
-      window.crypto.getRandomValues(challenge);
-
-      const publicKeyCredentialRequestOptions = {
-        challenge: challenge,
-        timeout: 60000,
-        userVerification: 'preferred'
-      };
-
-      // If WebAuthn get is supported
-      if (navigator.credentials && navigator.credentials.get) {
-        // Native biometric prompt on Android / Mac
-        await navigator.credentials.get({ publicKey: publicKeyCredentialRequestOptions }).catch(() => null);
-      }
-      
-      // Unlock on success or device pass
-      document.getElementById('biometricLockModal')?.classList.add('hidden');
-    } catch (err) {
-      console.log('Biometric pass:', err);
-      document.getElementById('biometricLockModal')?.classList.add('hidden');
-    }
+window.togglePrivacyLock = function() {
+  const current = localStorage.getItem(PRIVACY_LOCK_KEY) === 'true';
+  if (!current) {
+    localStorage.setItem(PRIVACY_LOCK_KEY, 'true');
+    alert('🔒 Blocco Privacy Schermo ATTIVATO! All\'apertura richiederà un tocco per visualizzare i dati.');
   } else {
-    // Fallback if browser doesn't have WebAuthn hardware
-    document.getElementById('biometricLockModal')?.classList.add('hidden');
+    localStorage.setItem(PRIVACY_LOCK_KEY, 'false');
+    alert('Blocco Privacy Schermo disattivato.');
   }
 };
 
-window.toggleBiometricSecurity = function() {
-  const current = localStorage.getItem(BIOMETRIC_KEY) === 'true';
-  if (!current) {
-    if (confirm('Vuoi attivare il blocco biometrico (Impronta Digitale / Touch ID / Face ID) per proteggere i tuoi dati sanitari?')) {
-      localStorage.setItem(BIOMETRIC_KEY, 'true');
-      alert('✅ Protezione con Impronta Digitale ATTIVATA! L\'app richiederà il riconoscimento biometrico all\'avvio.');
-    }
-  } else {
-    if (confirm('Vuoi disattivare il blocco con impronta digitale?')) {
-      localStorage.setItem(BIOMETRIC_KEY, 'false');
-      alert('Protezione biometrica disattivata.');
-    }
-  }
+// --- OPTIONS MODAL & VERSION INFO ---
+window.openOptionsModal = function() {
+  document.getElementById('optionsModal')?.classList.remove('hidden');
+};
+
+window.closeOptionsModal = function() {
+  document.getElementById('optionsModal')?.classList.add('hidden');
 };
 
 window.renderAll = function() {
@@ -415,7 +490,7 @@ function updateKPIs(latest, days) {
   setTxt('kpi-sleep-score', latest.sleepScore || 85);
   setTxt('kpi-deep-sleep', `${latest.deepSleepPercent || 22}%`);
   setTxt('kpi-sleep-duration', `${latest.sleepDurationHours || 7.5} h`);
-  setTxt('kpi-resting-hr', latest.restingHR || 54);
+  setTxt('kpi-resting-hr', latest.restingHR || 53);
   setTxt('kpi-stress', `${latest.stressScore || 22} / 100`);
 
   setTxt('kpi-weight', (latest.weight || 72.1).toFixed(1));
@@ -547,7 +622,7 @@ window.saveSymptomsData = function() {
 function updateMedicalReport(latest, days) {
   setTxt('reportDate', new Date().toLocaleDateString('it-IT'));
 
-  const avgRhr = Math.round(days.reduce((a, b) => a + (b.restingHR || 54), 0) / days.length);
+  const avgRhr = Math.round(days.reduce((a, b) => a + (b.restingHR || 53), 0) / days.length);
   const avgDeep = (days.reduce((a, b) => a + (b.deepSleepPercent || 22), 0) / days.length).toFixed(1);
   const visc = latest.visceralFat !== undefined ? latest.visceralFat : 6.0;
 
@@ -574,6 +649,7 @@ window.switchTab = function(tabId) {
 
   setTimeout(() => {
     if (window.sleepChartInstance) window.sleepChartInstance.resize();
+    if (window.heartRateChartInstance) window.heartRateChartInstance.resize();
     if (window.weightChartInstance) window.weightChartInstance.resize();
     if (window.symptomsChartInstance) window.symptomsChartInstance.resize();
     if (window.fatCompartmentsChartInstance) window.fatCompartmentsChartInstance.resize();

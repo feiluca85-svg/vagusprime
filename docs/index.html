@@ -43,22 +43,104 @@
 </head>
 <body class="bg-[#090d16] text-gray-100 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-black">
 
-  <!-- BIOMETRIC FINGERPRINT LOCK MODAL -->
-  <div id="biometricLockModal" class="hidden fixed inset-0 z-50 bg-[#090d16]/95 backdrop-blur-xl flex items-center justify-center p-4">
+  <!-- FULLSCREEN DRAG & DROP OVERLAY -->
+  <div id="globalDropOverlay" class="fixed inset-0 z-50 bg-[#090d16]/90 backdrop-blur-md flex-col items-center justify-center border-4 border-dashed border-emerald-500 m-4 rounded-3xl text-center">
+    <div class="w-20 h-20 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4 mx-auto animate-bounce">
+      <i data-lucide="upload-cloud" class="w-10 h-10"></i>
+    </div>
+    <h2 class="text-xl font-bold text-white mb-2">Rilascia il File per Sincronizzare</h2>
+    <p class="text-sm text-gray-300">File Renpho (.xls/.csv) o Huawei Health (.json/.jpg)</p>
+  </div>
+
+  <!-- PULL TO REFRESH INDICATOR -->
+  <div id="pullToRefreshIndicator" class="no-print w-full flex items-center justify-center bg-gray-900/90 border-b border-gray-800 text-xs text-cyan-400 gap-2 font-medium">
+    <i id="pullSpinner" data-lucide="refresh-cw" class="w-4 h-4 transition-transform"></i>
+    <span id="pullText">Trascina verso il basso per sincronizzare...</span>
+  </div>
+
+  <!-- SYNC TOAST NOTIFICATION -->
+  <div id="syncToast" class="hidden fixed bottom-6 right-6 z-50 glass-card px-5 py-3 border-l-4 border-l-emerald-500 shadow-2xl flex items-center gap-3 bg-[#0c121e]">
+    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+    <div>
+      <h4 class="text-xs font-bold text-white">Dati Sincronizzati</h4>
+      <p class="text-[11px] text-gray-400">Grafici e parametri biometrici aggiornati</p>
+    </div>
+  </div>
+
+  <!-- PRIVACY LOCK MODAL -->
+  <div id="privacyLockModal" class="hidden fixed inset-0 z-50 bg-[#090d16]/95 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="glass-card max-w-sm w-full p-8 text-center border border-gray-800 shadow-2xl">
-      <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-violet-600/20 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-500/10 cursor-pointer animate-pulse" onclick="authenticateBiometric()">
-        <i data-lucide="fingerprint" class="w-10 h-10 text-emerald-400"></i>
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-violet-600/20 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-500/10 cursor-pointer animate-pulse" onclick="unlockPrivacyScreen()">
+        <i data-lucide="shield-check" class="w-8 h-8 text-emerald-400"></i>
       </div>
       <h2 class="text-lg font-bold text-white mb-1">VagusPrime Protetto</h2>
-      <p class="text-xs text-gray-400 mb-6">Tocca l'impronta o il sensore del tuo dispositivo per sbloccare i tuoi dati</p>
+      <p class="text-xs text-gray-400 mb-6">Tocca per accedere ai tuoi dati sanitari</p>
       
-      <button onclick="authenticateBiometric()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-        <i data-lucide="fingerprint" class="w-5 h-5"></i> Sblocca con Impronta Digitale
+      <button onclick="unlockPrivacyScreen()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+        <i data-lucide="unlock" class="w-4 h-4"></i> Accedi alla Dashboard
       </button>
+    </div>
+  </div>
 
-      <button onclick="document.getElementById('biometricLockModal').classList.add('hidden')" class="text-[11px] text-gray-500 hover:text-gray-400 mt-4 block mx-auto underline">
-        Accesso Diretto
-      </button>
+  <!-- OPTIONS / SETTINGS MODAL -->
+  <div id="optionsModal" class="hidden fixed inset-0 z-50 bg-[#090d16]/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 border border-gray-800 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-gray-800 pb-4 mb-5">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-lg bg-gray-800 text-gray-300">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Opzioni & Informazioni</h3>
+            <p class="text-[11px] text-gray-400">Configurazione e versione app</p>
+          </div>
+        </div>
+        <button onclick="closeOptionsModal()" class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs text-gray-300">
+        <!-- VERSION BADGE -->
+        <div class="p-3 rounded-xl bg-gray-900/80 border border-gray-800 flex items-center justify-between">
+          <span>Versione Applicazione:</span>
+          <span id="optionsVersionBadge" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">v1.2.0</span>
+        </div>
+
+        <!-- BACKUP & EXPORT -->
+        <div class="p-4 rounded-xl bg-gray-900/50 border border-gray-800 space-y-2.5">
+          <h4 class="font-semibold text-white flex items-center gap-2">
+            <i data-lucide="shield" class="w-4 h-4 text-violet-400"></i> Backup Dati Personali
+          </h4>
+          <p class="text-[11px] text-gray-400">Tutti i dati risiedono solo su questo dispositivo. Scarica il file per sincronizzarli su un altro smartphone o Mac.</p>
+          <div class="flex gap-2 pt-1">
+            <button onclick="exportDatabaseBackup()" class="flex-1 py-2 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Esporta .JSON
+            </button>
+            <label class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold rounded-lg transition border border-gray-700 cursor-pointer flex items-center justify-center gap-1.5">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> Ripristina
+              <input type="file" accept=".json" onchange="importDatabaseBackup(event)" class="hidden">
+            </label>
+          </div>
+        </div>
+
+        <!-- PRIVACY TOGGLE -->
+        <div class="p-3 rounded-xl bg-gray-900/50 border border-gray-800 flex items-center justify-between">
+          <div>
+            <span class="font-medium text-white block">Blocco Privacy all'Avvio</span>
+            <span class="text-[10px] text-gray-400">Mostra schermata protetta all'apertura</span>
+          </div>
+          <button onclick="togglePrivacyLock()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-lg border border-gray-700">
+            Attiva / Disattiva
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button onclick="closeOptionsModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg text-xs">
+          Chiudi
+        </button>
+      </div>
     </div>
   </div>
 
@@ -74,24 +156,22 @@
         <div>
           <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
             VagusPrime
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Zero-Knowledge</span>
           </h1>
           <p class="text-xs text-gray-400">Biohacking & Longevity Blueprint</p>
         </div>
       </div>
 
-      <!-- Quick Date & Privacy Controls -->
+      <!-- Quick Date & Options Button -->
       <div class="flex items-center space-x-3">
         <div class="hidden md:flex items-center text-xs text-gray-400 bg-gray-900/60 border border-gray-800 px-3 py-1.5 rounded-lg">
           <i data-lucide="calendar" class="w-4 h-4 mr-2 text-cyan-400"></i>
           <span id="currentDateDisplay">Caricamento...</span>
         </div>
-        <button onclick="toggleBiometricSecurity()" class="p-2 text-gray-400 hover:text-emerald-400 rounded-lg hover:bg-gray-800/60 transition" title="Attiva/Disattiva Protezione Impronta Digitale">
-          <i data-lucide="fingerprint" class="w-5 h-5 text-emerald-400"></i>
-        </button>
-        <button onclick="switchTab('import')" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500 hover:bg-emerald-400 text-gray-950 flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/20">
-          <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-          <span>Dati</span>
+        
+        <!-- OPTIONS / SETTINGS BUTTON WITH VERSION -->
+        <button onclick="openOptionsModal()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-900 hover:bg-gray-800 text-gray-200 border border-gray-800 hover:border-gray-700 flex items-center gap-2 transition shadow-sm" title="Opzioni e Versione Applicazione">
+          <i data-lucide="settings" class="w-4 h-4 text-emerald-400"></i>
+          <span id="appVersionDisplay" class="font-mono text-[11px] text-emerald-400">v1.2.0</span>
         </button>
       </div>
     </div>
@@ -236,26 +316,40 @@
         </div>
       </div>
 
+      <!-- MAIN CHARTS ROW -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 1. DEDICATED HEART RATE CHART -->
         <div class="glass-card p-5">
           <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
-            <i data-lucide="moon" class="w-4 h-4 text-cyan-400"></i> Sonno Profondo & Frequenza a Riposo
+            <i data-lucide="heart-pulse" class="w-4 h-4 text-rose-400"></i> Frequenza Cardiaca a Riposo (RHR Notturno)
+          </h3>
+          <div class="h-64 relative"><canvas id="heartRateChart"></canvas></div>
+        </div>
+
+        <!-- 2. SLEEP CHART -->
+        <div class="glass-card p-5">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
+            <i data-lucide="moon" class="w-4 h-4 text-cyan-400"></i> Sonno Profondo & Qualità Notturna
           </h3>
           <div class="h-64 relative"><canvas id="sleepChart"></canvas></div>
         </div>
+      </div>
+
+      <!-- SECOND CHARTS ROW -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="glass-card p-5">
           <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
             <i data-lucide="trending-down" class="w-4 h-4 text-amber-400"></i> Evoluzione Peso & Grasso Viscerale
           </h3>
           <div class="h-64 relative"><canvas id="weightChart"></canvas></div>
         </div>
-      </div>
 
-      <div class="glass-card p-5">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
-          <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Diario Sintomi & Benessere Viscerale (1-5)
-        </h3>
-        <div class="h-60 relative"><canvas id="symptomsChart"></canvas></div>
+        <div class="glass-card p-5">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4">
+            <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Diario Sintomi & Benessere Viscerale (1-5)
+          </h3>
+          <div class="h-64 relative"><canvas id="symptomsChart"></canvas></div>
+        </div>
       </div>
     </div>
 
@@ -393,7 +487,7 @@
       <div class="glass-card p-6 border-l-4 border-l-violet-500 bg-gradient-to-r from-violet-950/30 via-gray-900/50 to-transparent">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">Privacy Zero-Knowledge & Backup <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">100% Privato</span></h3>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">Backup & Sincronizzazione Dispositivi</h3>
             <p class="text-xs text-gray-300 mt-1">Dati salvati solo sul tuo dispositivo. Esporta il backup per trasferirlo tra Mac e Smartphone.</p>
           </div>
           <div class="flex items-center gap-3 w-full md:w-auto">
