@@ -67,17 +67,19 @@
     </div>
   </div>
 
-  <!-- PRIVACY LOCK MODAL -->
-  <div id="privacyLockModal" class="hidden fixed inset-0 z-50 bg-[#090d16]/95 backdrop-blur-xl flex items-center justify-center p-4">
+  <!-- REAL BIOMETRIC HARDWARE SENSOR LOCK MODAL -->
+  <div id="biometricLockModal" class="hidden fixed inset-0 z-50 bg-[#090d16]/95 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="glass-card max-w-sm w-full p-8 text-center border border-gray-800 shadow-2xl">
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-violet-600/20 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-500/10 cursor-pointer animate-pulse" onclick="unlockPrivacyScreen()">
-        <i data-lucide="shield-check" class="w-8 h-8 text-emerald-400"></i>
+      <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-violet-600/20 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-500/10 cursor-pointer animate-pulse" onclick="promptHardwareFingerprint()">
+        <i data-lucide="fingerprint" class="w-10 h-10 text-emerald-400"></i>
       </div>
       <h2 class="text-lg font-bold text-white mb-1">VagusPrime Protetto</h2>
-      <p class="text-xs text-gray-400 mb-6">Tocca per accedere ai tuoi dati sanitari</p>
+      <p class="text-xs text-gray-400 mb-5">Tocca il pulsante qui sotto per attivare il sensore di impronte digitali del tuo smartphone / Touch ID</p>
       
-      <button onclick="unlockPrivacyScreen()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-        <i data-lucide="unlock" class="w-4 h-4"></i> Accedi alla Dashboard
+      <div id="biometricError" class="text-xs text-rose-400 font-medium mb-4 p-2 bg-rose-500/10 rounded-lg border border-rose-500/20 hidden"></div>
+
+      <button onclick="promptHardwareFingerprint()" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+        <i data-lucide="fingerprint" class="w-5 h-5"></i> Riconosci Impronta Digitale
       </button>
     </div>
   </div>
@@ -104,7 +106,20 @@
         <!-- VERSION BADGE -->
         <div class="p-3 rounded-xl bg-gray-900/80 border border-gray-800 flex items-center justify-between">
           <span>Versione Applicazione:</span>
-          <span id="optionsVersionBadge" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">v1.2.0</span>
+          <span id="optionsVersionBadge" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">v1.2.1</span>
+        </div>
+
+        <!-- BIOMETRIC FINGERPRINT OPTION -->
+        <div class="p-3.5 rounded-xl bg-gray-900/50 border border-gray-800 flex items-center justify-between">
+          <div>
+            <span class="font-medium text-white flex items-center gap-1.5">
+              <i data-lucide="fingerprint" class="w-4 h-4 text-emerald-400"></i> Blocco con Impronta Digitale
+            </span>
+            <span class="text-[10px] text-gray-400">Stato: <strong id="biometricStatusBadge" class="text-gray-400">Verifica...</strong></span>
+          </div>
+          <button onclick="toggleBiometricAuth()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-emerald-400 font-bold rounded-lg border border-gray-700">
+            Attiva / Disattiva
+          </button>
         </div>
 
         <!-- BACKUP & EXPORT -->
@@ -112,7 +127,7 @@
           <h4 class="font-semibold text-white flex items-center gap-2">
             <i data-lucide="shield" class="w-4 h-4 text-violet-400"></i> Backup Dati Personali
           </h4>
-          <p class="text-[11px] text-gray-400">Tutti i dati risiedono solo su questo dispositivo. Scarica il file per sincronizzarli su un altro smartphone o Mac.</p>
+          <p class="text-[11px] text-gray-400">I dati risiedono solo su questo dispositivo. Scarica il file per sincronizzarli su un altro smartphone o Mac.</p>
           <div class="flex gap-2 pt-1">
             <button onclick="exportDatabaseBackup()" class="flex-1 py-2 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5">
               <i data-lucide="download" class="w-3.5 h-3.5"></i> Esporta .JSON
@@ -122,17 +137,6 @@
               <input type="file" accept=".json" onchange="importDatabaseBackup(event)" class="hidden">
             </label>
           </div>
-        </div>
-
-        <!-- PRIVACY TOGGLE -->
-        <div class="p-3 rounded-xl bg-gray-900/50 border border-gray-800 flex items-center justify-between">
-          <div>
-            <span class="font-medium text-white block">Blocco Privacy all'Avvio</span>
-            <span class="text-[10px] text-gray-400">Mostra schermata protetta all'apertura</span>
-          </div>
-          <button onclick="togglePrivacyLock()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-cyan-400 font-bold rounded-lg border border-gray-700">
-            Attiva / Disattiva
-          </button>
         </div>
       </div>
 
@@ -171,7 +175,7 @@
         <!-- OPTIONS / SETTINGS BUTTON WITH VERSION -->
         <button onclick="openOptionsModal()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-900 hover:bg-gray-800 text-gray-200 border border-gray-800 hover:border-gray-700 flex items-center gap-2 transition shadow-sm" title="Opzioni e Versione Applicazione">
           <i data-lucide="settings" class="w-4 h-4 text-emerald-400"></i>
-          <span id="appVersionDisplay" class="font-mono text-[11px] text-emerald-400">v1.2.0</span>
+          <span id="appVersionDisplay" class="font-mono text-[11px] text-emerald-400">v1.2.1</span>
         </button>
       </div>
     </div>

@@ -1,9 +1,10 @@
-// --- VAGUSPRIME: APP.JS (VERSION v1.2.0 - ZERO-KNOWLEDGE BIOHACKING ENGINE) ---
+// --- VAGUSPRIME: APP.JS (VERSION v1.2.1 - REAL BIOMETRIC HARDWARE SENSOR AUTH) ---
 
-const APP_VERSION = 'v1.2.0';
+const APP_VERSION = 'v1.2.1';
 const APP_BUILD_DATE = '30 Agosto 2026';
 const STORAGE_KEY = 'vagusprime_blueprint_db';
-const PRIVACY_LOCK_KEY = 'vagusprime_privacy_lock';
+const BIOMETRIC_ENABLED_KEY = 'vagusprime_biometric_active';
+const BIOMETRIC_CRED_ID_KEY = 'vagusprime_biometric_credential_id';
 
 window.AppState = {
   db: null,
@@ -304,11 +305,24 @@ function saveLocalDB(db) {
   window.AppState.db = db;
 }
 
+// Convert string to base64 buffer helper
+function bufferToBase64(buf) {
+  let bin = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+  return window.btoa(bin);
+}
+
+function base64ToBuffer(b64) {
+  const bin = window.atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Setup gestures & options
   setupPullToRefresh();
   setupGlobalDragDrop();
-  checkPrivacyLock();
 
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const todayDate = new Date();
@@ -326,8 +340,136 @@ document.addEventListener('DOMContentLoaded', () => {
   window.AppState.db = loadLocalDB();
   renderAll();
 
+  // Check and trigger biometric lock on boot
+  checkBiometricLockOnStart();
+
   if (window.lucide) lucide.createIcons();
 });
+
+// --- HARDWARE BIOMETRIC (FINGERPRINT / TOUCH ID) AUTHENTICATION ---
+
+async function checkBiometricLockOnStart() {
+  const isEnabled = localStorage.getItem(BIOMETRIC_ENABLED_KEY) === 'true';
+  const modal = document.getElementById('biometricLockModal');
+  if (isEnabled && modal) {
+    modal.classList.remove('hidden');
+    // Prompt native hardware sensor
+    setTimeout(() => {
+      promptHardwareFingerprint();
+    }, 300);
+  }
+}
+
+window.promptHardwareFingerprint = async function() {
+  const errEl = document.getElementById('biometricError');
+  if (errEl) errEl.classList.add('hidden');
+
+  if (!window.PublicKeyCredential) {
+    alert('Il sensore di impronte digitali non è supportato da questo browser.');
+    document.getElementById('biometricLockModal')?.classList.add('hidden');
+    return;
+  }
+
+  const storedCredId = localStorage.getItem(BIOMETRIC_CRED_ID_KEY);
+
+  try {
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+
+    // If no credential registered yet on this device, register it first with user's fingerprint
+    if (!storedCredId) {
+      const userHandle = new Uint8Array(16);
+      window.crypto.getRandomValues(userHandle);
+
+      const createOptions = {
+        publicKey: {
+          challenge: challenge,
+          rp: { name: "VagusPrime Health" },
+          user: {
+            id: userHandle,
+            name: "vagusprime_user",
+            displayName: "VagusPrime Subject VP-01"
+          },
+          pubKeyCredParams: [
+            { alg: -7, type: "public-key" },  // ES256
+            { alg: -257, type: "public-key" } // RS256
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform", // Native device sensor (Android Fingerprint / Touch ID)
+            userVerification: "required"
+          },
+          timeout: 60000
+        }
+      };
+
+      const credential = await navigator.credentials.create(createOptions);
+      if (credential) {
+        const credIdB64 = bufferToBase64(credential.rawId);
+        localStorage.setItem(BIOMETRIC_CRED_ID_KEY, credIdB64);
+        localStorage.setItem(BIOMETRIC_ENABLED_KEY, 'true');
+        document.getElementById('biometricLockModal')?.classList.add('hidden');
+        updateBiometricButtonUI();
+        if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+      }
+    } else {
+      // Prompt fingerprint for verification
+      const rawIdBuffer = base64ToBuffer(storedCredId);
+      const getOptions = {
+        publicKey: {
+          challenge: challenge,
+          allowCredentials: [{
+            id: rawIdBuffer,
+            type: 'public-key',
+            transports: ['internal']
+          }],
+          userVerification: 'required',
+          timeout: 60000
+        }
+      };
+
+      const assertion = await navigator.credentials.get(getOptions);
+      if (assertion) {
+        // Fingerprint verified by OS hardware!
+        document.getElementById('biometricLockModal')?.classList.add('hidden');
+        if (navigator.vibrate) navigator.vibrate(50);
+      }
+    }
+  } catch (err) {
+    console.error('Biometric authentication error:', err);
+    if (errEl) {
+      errEl.textContent = 'Impronta non riconosciuta o annullata. Tocca per riprovare.';
+      errEl.classList.remove('hidden');
+    }
+  }
+};
+
+window.toggleBiometricAuth = async function() {
+  const current = localStorage.getItem(BIOMETRIC_ENABLED_KEY) === 'true';
+  if (!current) {
+    // Setup and test fingerprint now
+    const ok = confirm('Vuoi abilitare la protezione con IMPRONTA DIGITALE / TOUCH ID?');
+    if (ok) {
+      document.getElementById('biometricLockModal')?.classList.remove('hidden');
+      await promptHardwareFingerprint();
+    }
+  } else {
+    if (confirm('Vuoi disattivare il blocco con impronta digitale?')) {
+      localStorage.setItem(BIOMETRIC_ENABLED_KEY, 'false');
+      localStorage.removeItem(BIOMETRIC_CRED_ID_KEY);
+      updateBiometricButtonUI();
+      alert('Protezione con impronta digitale disattivata.');
+    }
+  }
+};
+
+function updateBiometricButtonUI() {
+  const isEnabled = localStorage.getItem(BIOMETRIC_ENABLED_KEY) === 'true';
+  const badge = document.getElementById('biometricStatusBadge');
+  if (badge) {
+    badge.textContent = isEnabled ? 'Attiva' : 'Disattivata';
+    badge.className = isEnabled ? 'text-emerald-400 font-bold' : 'text-gray-400';
+  }
+}
 
 // --- PULL TO REFRESH & SYNC GESTURE ---
 function setupPullToRefresh() {
@@ -338,9 +480,7 @@ function setupPullToRefresh() {
   const text = document.getElementById('pullText');
 
   window.addEventListener('touchstart', (e) => {
-    if (window.scrollY === 0) {
-      touchStartY = e.touches[0].clientY;
-    }
+    if (window.scrollY === 0) touchStartY = e.touches[0].clientY;
   }, { passive: true });
 
   window.addEventListener('touchmove', (e) => {
@@ -352,7 +492,7 @@ function setupPullToRefresh() {
           indicator.style.height = `${height}px`;
           indicator.classList.add('pulling');
           if (height > 55) {
-            text.textContent = 'Rilascia per sincronizzare Renpho & Huawei';
+            text.textContent = 'Rilascia per sincronizzare';
             spinner.style.transform = `rotate(${height * 4}deg)`;
           } else {
             text.textContent = 'Trascina verso il basso per sincronizzare...';
@@ -381,7 +521,6 @@ window.triggerAppSync = function() {
     syncToast.classList.remove('hidden');
     setTimeout(() => syncToast.classList.add('hidden'), 2200);
   }
-  // Reload database and re-render charts
   window.AppState.db = loadLocalDB();
   renderAll();
   if (navigator.vibrate) navigator.vibrate(50);
@@ -407,9 +546,7 @@ function setupGlobalDragDrop() {
     }
   });
 
-  window.addEventListener('dragover', (e) => {
-    e.preventDefault();
-  });
+  window.addEventListener('dragover', (e) => e.preventDefault());
 
   window.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -420,41 +557,16 @@ function setupGlobalDragDrop() {
       const name = file.name.toLowerCase();
       if (name.includes('renpho') || name.endsWith('.xls') || name.endsWith('.xlsx') || name.endsWith('.csv')) {
         if (window.handleRenphoClient) window.handleRenphoClient(file);
-      } else if (name.includes('huawei') || name.endsWith('.json') || name.endsWith('.zip') || name.endsWith('.jpg') || name.endsWith('.png')) {
-        if (window.handleHuaweiClient) window.handleHuaweiClient(file);
       } else {
-        if (window.handleRenphoClient) window.handleRenphoClient(file);
+        if (window.handleHuaweiClient) window.handleHuaweiClient(file);
       }
     }
   });
 }
 
-// --- PRIVACY LOCK (ONE-TOUCH & DISCRETE) ---
-function checkPrivacyLock() {
-  const isLocked = localStorage.getItem(PRIVACY_LOCK_KEY) === 'true';
-  const modal = document.getElementById('privacyLockModal');
-  if (isLocked && modal) {
-    modal.classList.remove('hidden');
-  }
-}
-
-window.unlockPrivacyScreen = function() {
-  document.getElementById('privacyLockModal')?.classList.add('hidden');
-};
-
-window.togglePrivacyLock = function() {
-  const current = localStorage.getItem(PRIVACY_LOCK_KEY) === 'true';
-  if (!current) {
-    localStorage.setItem(PRIVACY_LOCK_KEY, 'true');
-    alert('🔒 Blocco Privacy Schermo ATTIVATO! All\'apertura richiederà un tocco per visualizzare i dati.');
-  } else {
-    localStorage.setItem(PRIVACY_LOCK_KEY, 'false');
-    alert('Blocco Privacy Schermo disattivato.');
-  }
-};
-
 // --- OPTIONS MODAL & VERSION INFO ---
 window.openOptionsModal = function() {
+  updateBiometricButtonUI();
   document.getElementById('optionsModal')?.classList.remove('hidden');
 };
 
