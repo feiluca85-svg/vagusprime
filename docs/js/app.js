@@ -1,6 +1,6 @@
-// --- VAGUSPRIME: APP.JS (VERSION v1.2.1 - REAL BIOMETRIC HARDWARE SENSOR AUTH) ---
+// --- VAGUSPRIME: APP.JS (VERSION v1.3.0 - REAL BIOMETRIC HARDWARE SENSOR AUTH) ---
 
-const APP_VERSION = 'v1.2.1';
+const APP_VERSION = 'v1.3.0';
 const APP_BUILD_DATE = '30 Agosto 2026';
 const STORAGE_KEY = 'vagusprime_blueprint_db';
 const BIOMETRIC_ENABLED_KEY = 'vagusprime_biometric_active';
