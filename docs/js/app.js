@@ -56,7 +56,7 @@ function getDefaultDatabase() {
         ruscovenPomeriggio: true,
         dinnerTime: "20:30",
         dinnerWithin20: false,
-        dinnerType: "vellutata",
+        dinnerType: "proteina_solida",
         tisanaSera: true,
         digestioneScore: 3,
         emorroidiScore: 3,
@@ -92,7 +92,7 @@ function getDefaultDatabase() {
         ruscovenPomeriggio: true,
         dinnerTime: "20:10",
         dinnerWithin20: true,
-        dinnerType: "vellutata",
+        dinnerType: "proteina_solida",
         tisanaSera: true,
         digestioneScore: 4,
         emorroidiScore: 3,
@@ -128,7 +128,7 @@ function getDefaultDatabase() {
         ruscovenPomeriggio: true,
         dinnerTime: "19:55",
         dinnerWithin20: true,
-        dinnerType: "brodo_pesce",
+        dinnerType: "uova_solida",
         tisanaSera: true,
         digestioneScore: 4,
         emorroidiScore: 4,
@@ -164,7 +164,7 @@ function getDefaultDatabase() {
         ruscovenPomeriggio: true,
         dinnerTime: "20:00",
         dinnerWithin20: true,
-        dinnerType: "vellutata",
+        dinnerType: "proteina_solida",
         tisanaSera: true,
         digestioneScore: 4,
         emorroidiScore: 4,
@@ -200,7 +200,7 @@ function getDefaultDatabase() {
         ruscovenPomeriggio: true,
         dinnerTime: "19:50",
         dinnerWithin20: true,
-        dinnerType: "vellutata",
+        dinnerType: "proteina_solida",
         tisanaSera: true,
         digestioneScore: 5,
         emorroidiScore: 5,
@@ -236,7 +236,7 @@ function getDefaultDatabase() {
         ruscovenPomeriggio: true,
         dinnerTime: "19:45",
         dinnerWithin20: true,
-        dinnerType: "brodo_pesce",
+        dinnerType: "uova_solida",
         tisanaSera: true,
         digestioneScore: 5,
         emorroidiScore: 5,
@@ -272,7 +272,7 @@ function getDefaultDatabase() {
         ruscovenPomeriggio: true,
         dinnerTime: "20:00",
         dinnerWithin20: true,
-        dinnerType: "vellutata",
+        dinnerType: "proteina_solida",
         tisanaSera: true,
         digestioneScore: 5,
         emorroidiScore: 5,
@@ -654,8 +654,8 @@ function populateTodayForms(todayData) {
   if (todayData.breakfastType === 'dolce' && document.getElementById('rad-dolce')) document.getElementById('rad-dolce').checked = true;
   if (document.getElementById('chk-ruscoven')) document.getElementById('chk-ruscoven').checked = !!todayData.ruscovenPomeriggio;
   if (todayData.dinnerTime && document.getElementById('dinnerTimeInput')) document.getElementById('dinnerTimeInput').value = todayData.dinnerTime;
-  if (todayData.dinnerType === 'vellutata' && document.getElementById('rad-vellutata')) document.getElementById('rad-vellutata').checked = true;
-  if (todayData.dinnerType === 'brodo_pesce' && document.getElementById('rad-brodo')) document.getElementById('rad-brodo').checked = true;
+  if (todayData.dinnerType === 'proteina_solida' && document.getElementById('rad-proteina')) document.getElementById('rad-proteina').checked = true;
+  if (todayData.dinnerType === 'uova_solida' && document.getElementById('rad-uova')) document.getElementById('rad-uova').checked = true;
   if (document.getElementById('chk-sedivitax')) document.getElementById('chk-sedivitax').checked = !!todayData.tisanaSera;
 
   if (todayData.digestioneScore && document.getElementById('range-digestione')) {
@@ -693,7 +693,7 @@ window.saveProtocolData = function() {
   const breakfastType = document.querySelector('input[name="breakfastType"]:checked')?.value || 'salata';
   const ruscovenPomeriggio = document.getElementById('chk-ruscoven')?.checked || false;
   const dinnerTime = document.getElementById('dinnerTimeInput')?.value || '20:00';
-  const dinnerType = document.querySelector('input[name="dinnerType"]:checked')?.value || 'vellutata';
+  const dinnerType = document.querySelector('input[name="dinnerType"]:checked')?.value || 'proteina_solida';
   const tisanaSera = document.getElementById('chk-sedivitax')?.checked || false;
   const dinnerWithin20 = dinnerTime <= '20:15';
 
